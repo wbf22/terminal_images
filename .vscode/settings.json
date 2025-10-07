@@ -1,0 +1,25 @@
+{
+    "files.associations": {
+        "miniz.h": "c",
+        "nbt.h": "c",
+        "dirent.h": "c",
+        "typeinfo": "c",
+        "map.h": "c",
+        "unistd.h": "c",
+        "stat.h": "c",
+        "bitset": "c",
+        "unordered_map": "c",
+        "__bit_reference": "c",
+        "__split_buffer": "c",
+        "string": "c",
+        "vector": "c",
+        "cjson.h": "c",
+        "stb_image.h": "c",
+        "__locale": "c",
+        "ios": "c",
+        "memory": "c",
+        "optional": "c",
+        "string_view": "c",
+        "variant": "c"
+    }
+}
