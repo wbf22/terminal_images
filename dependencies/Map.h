@@ -25,21 +25,21 @@ typedef struct Element {
     // insert into map
     Map* map = new_map();
     MyStruct object = {1, 3};
-    unique(map, "my_key", &object);
+    m_unique(map, "my_key", &object);
 
     // update an element (2 ways)
-    MyStruct* back_out = (MyStruct*) at(map, "my_key");
+    MyStruct* back_out = (MyStruct*) m_get(map, "my_key");
     back_out->y = 14;
-    back_out = (MyStruct*) at(map, "my_key");
+    back_out = (MyStruct*) m_get(map, "my_key");
     printf("{%d,%d}\n",back_out->x, back_out->y);
 
     MyStruct replacement = {10, 33};
-    insert(map, "my_key", &replacement, sizeof(replacement));
-    back_out = (MyStruct*) at(map, "my_key");
+    m_put(map, "my_key", &replacement, sizeof(replacement));
+    back_out = (MyStruct*) m_get(map, "my_key");
     printf("{%d,%d}\n",back_out->x, back_out->y);
 
     // remove element
-    erase(map, "my_key");
+    m_erase(map, "my_key");
 
     // get map length
     printf("%d\n", map->len);
@@ -52,7 +52,7 @@ typedef struct Element {
 
         char key[5];
         make_key(&i, sizeof(int), key, 5);
-        unique(map, key, new_object);
+        m_unique(map, key, new_object);
     }
 
     Element** items = map_elements(map);
@@ -92,13 +92,13 @@ typedef struct Element {
     # METHODS
 
     Methods with their time complexity
-    - insert() int_insert() any_insert() unique() int_unique() any_unique() -> O(1) amoritized
-    - at() int_at() any_at() -> O(1) amoritized
-    - erase() int_erase() any_erase() -> O(1) amoritized
+    - m_put() m_int_put() m_any_put() m_unique() m_int_unique() m_any_unique() -> O(1) amoritized
+    - m_get() m_int_get() m_any_get(() -> O(1) amoritized
+    - m_erase() m_int_m_erase() m_any_m_erase() -> O(1) amoritized
     - free_map() -> O(n)
     - clear_map() -> O(n)
     - map_elements() -> O(n)
-    - contains() int_contains() any_contains() -> O(1) amoritized
+    - m_contains() m_int_contains() m_any_contains() -> O(1) amoritized
 
 
 
@@ -320,8 +320,7 @@ static void insert_no_resize(Map* map, void* key, size_t key_size, void* data, s
         // copy the key
         char* key_copy = malloc(key_size);
         if (key_copy == NULL) {
-            fprintf(stderr, "Map couldn't get more memory on the system! Exiting...");
-            exit(EXIT_FAILURE);
+            map_mem_error_exit_failing();
         }
         memcpy(key_copy, key, key_size);
 
@@ -342,7 +341,7 @@ static void insert_no_resize(Map* map, void* key, size_t key_size, void* data, s
             memcpy(map->data[index]->data, data, data_size);
         }
         else {
-            fprintf(stderr, "Element already exists. Aborting to avoid leaving an unfreed pointer. (use 'insert()' to overwrite elements or simply retrieve and modify elements) Exiting...");
+            fprintf(stderr, "Element already exists. Aborting to avoid leaving an unfreed pointer. (use 'm_put()' to overwrite elements or simply retrieve and modify elements) Exiting...");
             exit(EXIT_FAILURE);
         }
 
@@ -406,7 +405,7 @@ static void resize_map(Map* map) {
     MyStruct key = {1, "hi"};
     MyStruct2 object = {1, 3};
 
-    any_unique(map, &key, sizeof(key), &object);
+    m_any_unique(map, &key, sizeof(key), &object);
     ```
     Does not allow overwriting existing elements, as this would leave an
     unfreed pointer. 
@@ -415,7 +414,7 @@ static void resize_map(Map* map) {
     and modify them.
 
 */
-void any_unique(Map* map, void* key, size_t key_size, void* data) {
+void m_any_unique(Map* map, void* key, size_t key_size, void* data) {
 
     insert_no_resize(map, key, key_size, data, -1);
 
@@ -433,8 +432,8 @@ void any_unique(Map* map, void* key, size_t key_size, void* data) {
     Use the insert methods to overwrite object, or simply retrieve objects
     and modify them.
 */
-void int_unique(Map* map, int key, void* data) {
-    any_unique(map, &key, sizeof(int), data);
+void m_int_unique(Map* map, int key, void* data) {
+    m_any_unique(map, &key, sizeof(int), data);
 }
 
 /*
@@ -445,8 +444,8 @@ void int_unique(Map* map, int key, void* data) {
     Use the insert methods to overwrite object, or simply retrieve objects
     and modify them.
 */
-void unique(Map* map, char* key, void* data) {
-    any_unique(map, key, (strlen(key) + 1) * sizeof(char), data);
+void m_unique(Map* map, char* key, void* data) {
+    m_any_unique(map, key, (strlen(key) + 1) * sizeof(char), data);
 }
 
 
@@ -459,11 +458,11 @@ void unique(Map* map, char* key, void* data) {
     MyStruct key = {1, "hi"};
     MyStruct2 object = {1, 3};
 
-    any_insert(map, &key, sizeof(key), &object, sizeof(object));
+    m_any_put(map, &key, sizeof(key), &object, sizeof(object));
     ```
 
 */
-void any_insert(Map* map, void* key, size_t key_size, void* data, size_t data_size) {
+void m_any_put(Map* map, void* key, size_t key_size, void* data, size_t data_size) {
 
     insert_no_resize(map, key, key_size, data, data_size);
 
@@ -476,8 +475,8 @@ void any_insert(Map* map, void* key, size_t key_size, void* data, size_t data_si
 /*
     Function to insert an object in the map using an int as the key.
 */
-void int_insert(Map* map, int key, void* data, size_t data_size) {
-    any_insert(map, &key, sizeof(int), data, data_size);
+void m_int_put(Map* map, int key, void* data, size_t data_size) {
+    m_any_put(map, &key, sizeof(int), data, data_size);
 }
 
 /*
@@ -486,8 +485,8 @@ void int_insert(Map* map, int key, void* data, size_t data_size) {
     The key is copied so the key passed in can be freed before the map
     if needed. (the key copy is freed by the free_map() function)
 */
-void insert(Map* map, char* key, void* data, size_t data_size) {
-    any_insert(map, key, (strlen(key) + 1) * sizeof(char), data, data_size);
+void m_put(Map* map, char* key, void* data, size_t data_size) {
+    m_any_put(map, key, (strlen(key) + 1) * sizeof(char), data, data_size);
 }
 
 
@@ -498,12 +497,12 @@ void insert(Map* map, char* key, void* data, size_t data_size) {
     ```
     Map* map = new_map();
     MyStruct key = {1, "hi"};
-    MyStruct2 object = (MyStruct2*) any_at(map, &key, sizeof(key));
+    MyStruct2 object = (MyStruct2*) m_any_get((map, &key, sizeof(key));
     ```
 
     Returns a NULL pointer if no object exists at the key
 */
-void* any_at(Map* map, void* key, size_t key_size) {
+void* m_any_get(Map* map, void* key, size_t key_size) {
     int hash_collisions = 0;
     size_t index = probe(map, key, key_size, &hash_collisions);
     if(map->data[index] == NULL) {
@@ -516,15 +515,15 @@ void* any_at(Map* map, void* key, size_t key_size) {
 /*
     Function to get an object in the map, using an int as the key
 */
-void* int_at(Map* map, int key) {
-    return any_at(map, &key, sizeof(key));
+void* m_int_get(Map* map, int key) {
+    return m_any_get(map, &key, sizeof(key));
 }
 
 /*
     Function to get an object in the map, using an string as the key
 */
-void* at(Map* map, char* key) {
-    return any_at(map, key, (strlen(key) + 1) * sizeof(char));
+void* m_get(Map* map, char* key) {
+    return m_any_get(map, key, (strlen(key) + 1) * sizeof(char));
 }
 
 
@@ -536,12 +535,12 @@ void* at(Map* map, char* key) {
     ```
     Map* map = new_map();
     MyStruct key = {1, "hi"};
-    any_erase(map, &key, sizeof(key));
+    m_any_m_erase(map, &key, sizeof(key));
     ```
 
     If the key doesn't exist nothing happens
 */
-void* any_erase(Map* map, void* key, size_t key_size) {
+void* m_any_m_erase(Map* map, void* key, size_t key_size) {
     int hash_collisions = 0;
     size_t index = probe(map, key, key_size, &hash_collisions);
 
@@ -581,8 +580,8 @@ void* any_erase(Map* map, void* key, size_t key_size) {
 
     If the key doesn't exist nothing happens
 */
-void* int_erase(Map* map, int key) {
-    return any_erase(map, &key, sizeof(key));
+void* m_int_m_erase(Map* map, int key) {
+    return m_any_m_erase(map, &key, sizeof(key));
 }
 
 /*
@@ -590,8 +589,8 @@ void* int_erase(Map* map, int key) {
 
     If the key doesn't exist nothing happens
 */
-void* erase(Map* map, char* key) {
-    return any_erase(map, key, (strlen(key) + 1) * sizeof(char));
+void* m_erase(Map* map, char* key) {
+    return m_any_m_erase(map, key, (strlen(key) + 1) * sizeof(char));
 }
 
 
@@ -644,12 +643,12 @@ void clear_map(Map* map) {
     ```
     Map* map = new_map();
     MyStruct key = {1, "hi"};
-    if(any_contains(map, &key, sizeof(key))) {
+    if(m_any_contains(map, &key, sizeof(key))) {
         printf("yay!");
     }
     ```
 */
-int any_contains(Map* map, void* key, size_t key_size) {
+int m_any_contains(Map* map, void* key, size_t key_size) {
 
     int hash_collisions = 0;
     size_t index = probe(map, key, key_size, &hash_collisions);
@@ -663,15 +662,15 @@ int any_contains(Map* map, void* key, size_t key_size) {
 /*
     Function to determine if an object is in the map, with an int used as the key.
 */
-int int_contains(Map* map, int key) {
-    return any_contains(map, &key, sizeof(key));
+int m_int_contains(Map* map, int key) {
+    return m_any_contains(map, &key, sizeof(key));
 }
 
 /*
     Function to determine if an object is in the map, with an string used as the key.
 */
-int contains(Map* map, char* key) {
-    return any_contains(map, key, (strlen(key) + 1) * sizeof(char));
+int m_contains(Map* map, char* key) {
+    return m_any_contains(map, key, (strlen(key) + 1) * sizeof(char));
 }
 
 #endif

@@ -20,6 +20,7 @@
         "memory": "c",
         "optional": "c",
         "string_view": "c",
-        "variant": "c"
+        "variant": "c",
+        "stb_image_write.h": "c"
     }
 }
