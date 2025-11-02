@@ -316,25 +316,23 @@ void* l_get(List* list, int index) {
 }
 
 /*
-    Copies the value in data to the index in the list. No new memory
-    is allocated, and the original pointer inserted at the index is 
-    updated. 
+    Replaces the pointer stored at the given index with 'data'.
+    No new memory is allocated; the pointer at that index is simply updated.
 */
-void l_set(List* list, int index, void* data, size_t data_size) {
+void l_set(List* list, int index, void* data) {
     int real_index = convert_index(list, index);
-    memcpy(list->data[real_index], data, data_size);
+    list->data[real_index] = data;
 }
 
 
 
 /*
-    Clears the list, and frees all object copies on the heap
-    created with pushes and sets
+    Clears the list, and frees all objects on the heap.
 */
 void l_clear(List* list) {
     // Free each pointer inside data
     for (size_t i = 0; i < list->data_size; i++) {
-        list->data[i] = NULL;
+        free(list->data[i]);
     }
     list->len = 0;
     list->start = 0;
@@ -346,6 +344,7 @@ void l_clear(List* list) {
 */
 void free_list(List* list) {
     // Free data
+    l_clear(list);
     free(list->data);
     // Free the struct itself
     free(list);

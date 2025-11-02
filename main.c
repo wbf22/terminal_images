@@ -249,6 +249,52 @@ int dist(
     return abs(r_1 - r_2) + abs(g_1 - g_2) + abs(b_1 - b_2) + abs(a_1 - a_2);
 }
 
+
+void set_bit(uint64_t* value, unsigned int n) {
+    if (n >= 64) return;  // prevent shifting by 64 or more (undefined behavior)
+    *value = *value | (1ULL << n);
+}
+
+
+int get_image_index(
+    int cell_x, 
+    int cell_y, 
+    int inside_cell_pixel_x, 
+    int inside_cell_pixel_y,
+    int image_width_cells,
+    int cell_width_pixels
+) {
+    
+    int i = cell_y * image_width_cells * cell_width_pixels + cell_x * cell_width_pixels; // top corner of cell in pixels
+    // adjust for y level inside cell
+    if (inside_cell_pixel_y != 0) {
+        i += (image_width_cells - cell_x) * cell_width_pixels; 
+        if (inside_cell_pixel_y > 1) {
+            int mult = inside_cell_pixel_y - 2;
+            i += mult * image_width_cells * cell_width_pixels;
+        }
+        i += cell_x * cell_width_pixels;
+    }
+    i += inside_cell_pixel_x; // adjust of x level inside cell
+    i *= 4;
+
+    return i;
+}
+
+
+
+void set_terminal_color_rgb(int fr, int fg, int fb, int br, int bg, int bb) {
+    // Foreground (text) = 38;2;r;g;b
+    // Background         = 48;2;r;g;b
+    printf("\033[38;2;%d;%d;%dm", fr, fg, fb);
+    printf("\033[48;2;%d;%d;%dm", br, bg, bb);
+}
+
+void ansii_reset() {
+    printf("\033[0m");
+}
+
+
 int main(int argc, char **argv) {
 
     if (argc != 2 || argv[1] == NULL) {
@@ -442,7 +488,7 @@ int main(int argc, char **argv) {
                 for (int x = 0; x < CURSOR_WIDTH; x++) {
                     for (int y = 0; y < CURSOR_HEIGHT; y++) {
                         
-                        int i = (c_y * CURSOR_WIDTH * image_width_cells + c_x * CURSOR_WIDTH) * 4;
+                        int i = get_image_index(c_x, c_y, x, y, image_width_cells, CURSOR_WIDTH);
                         uint8_t r = new_image[i];
                         uint8_t g = new_image[i+1];
                         uint8_t b = new_image[i+2];
@@ -456,21 +502,118 @@ int main(int argc, char **argv) {
                             l_push(avg_1, coor);
                         }
                         else {
-
+                            l_push(avg_2, coor);
                         }
                     }
                 }
 
                 // determine new averages
+                for (int i = 0; i < avg_1->len; ++i) {
+                    int* coor = l_get(avg_1, i);
+                    int index = get_image_index(c_x, c_y, coor[0], coor[1], image_width_cells, CURSOR_WIDTH);
+                    avg_1_r += new_image[index];
+                    avg_1_g += new_image[index+1];
+                    avg_1_b += new_image[index+2];
+                    avg_1_a += new_image[index+3];
+                }
+                l_clear(avg_1);
+                for (int i = 0; i < avg_2->len; ++i) {
+                    int* coor = l_get(avg_2, i);
+                    int index = get_image_index(c_x, c_y, coor[0], coor[1], image_width_cells, CURSOR_WIDTH);
+                    avg_2_r += new_image[index];
+                    avg_2_g += new_image[index+1];
+                    avg_2_b += new_image[index+2];
+                    avg_2_a += new_image[index+3];
+                }
+                l_clear(avg_2);
 
             }
+            free_list(avg_1);
+            free_list(avg_2);
 
 
             // determine character that matches the pixels the best
+            uint64_t first_variation[2] = {0, 0}; // avg_1 is set or is text
+            uint64_t second_variation[2] = {0, 0}; // avg_2 is set or is text
+            for (int x = 0; x < CURSOR_WIDTH; x++) {
+                for (int y = 0; y < CURSOR_HEIGHT; y++) {
+
+                    int i = get_image_index(c_x, c_y, x, y, image_width_cells, CURSOR_WIDTH);
+                    uint8_t r = new_image[i];
+                    uint8_t g = new_image[i+1];
+                    uint8_t b = new_image[i+2];
+                    uint8_t a = new_image[i+3];
+                    int dist_1 = dist(avg_1_r, avg_1_g, avg_1_g, avg_1_a, r, g, b, a);
+                    int dist_2 = dist(avg_2_r, avg_2_g, avg_2_g, avg_2_a, r, g, b, a);
+
+                    int index = x + y * CURSOR_WIDTH;
+                    int is_second_uint = 0;
+                    if (index > 64) {
+                        is_second_uint = 1;
+                        index %= 64;
+                    }
+                    
+                    if (dist_1 < dist_2) {
+                        set_bit(
+                            is_second_uint? &first_variation[1] : &first_variation[0],
+                            index
+                        );
+                    }
+                    else {
+                        set_bit(
+                            is_second_uint? &second_variation[1] : &second_variation[0],
+                            index
+                        );
+                    }   
+                }
+            }
+
+
+            int is_first_best = 1;
+            int best_variation_closeness = 0;
+            char* element_key = "";
+
+            Element** elements = map_elements(character_to_pixels);
+            for (int i = 0; i < character_to_pixels->len; ++i) {
+                Element* element = elements[i];
+                uint64_t* bits = element->data;
+                
+                int closeness = count_shared_bits(bits, first_variation);
+                if (closeness > best_variation_closeness) {
+                    is_first_best = 1;
+                    best_variation_closeness = closeness;
+                    element_key = element->key;
+                }
+
+                closeness = count_shared_bits(bits, second_variation);
+                if (closeness > best_variation_closeness) {
+                    is_first_best = 0;
+                    best_variation_closeness = closeness;
+                    element_key = element->key;
+                }
+                free(element);
+            }
+            free(elements);
+            
+
 
 
             // print
-            
+            if (is_first_best) {
+                set_terminal_color_rgb(avg_1_r, avg_1_g, avg_1_b, avg_2_r, avg_2_g, avg_2_b);
+            }
+            else {
+                set_terminal_color_rgb(avg_2_r, avg_2_g, avg_2_b, avg_1_r, avg_1_g, avg_1_b);
+            }
+            printf(element_key);
+        }
+
+        // new line or flush for last
+        if (c_y != image_height_cells) {
+            printf("\n");
+        }
+        else {
+            fflush(stdout);  
         }
     }
 
