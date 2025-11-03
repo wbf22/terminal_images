@@ -290,8 +290,9 @@ static void free_map_data(Map* map, int is_freeing_objects) {
         if (map->data[i] != NULL) {
             free( map->data[i]->key);
             if (is_freeing_objects) {
-                free( map->data[i]);
+                free(map->data[i]->data);
             }
+            free( map->data[i]);
         }
     }
     free(map->data);

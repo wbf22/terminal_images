@@ -10,9 +10,9 @@
             "name": "Test C",
             "program": "${workspaceFolder}/ti",
             "args": [
-                // "test_image.png"
-                "wizard.jpg"
-                // "test.png"
+                // "test/skull_knight.png"
+                "test/wizards.jpg"
+                // "test/test.png"
             ],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "bear_make"
