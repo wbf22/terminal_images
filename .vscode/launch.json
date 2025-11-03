@@ -12,6 +12,7 @@
             "args": [
                 // "test_image.png"
                 "wizard.jpg"
+                // "test.png"
             ],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "bear_make"
