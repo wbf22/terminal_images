@@ -285,26 +285,23 @@ static size_t probe(Map* map, void* key, size_t key_size, int* hash_collisions) 
 }
 
 
-static void free_map_data(Map* map) {
+static void free_map_data(Map* map, int is_freeing_objects) {
     for (size_t i = 0; i < map->data_size; ++i) {
         if (map->data[i] != NULL) {
             free( map->data[i]->key);
-            free( map->data[i]);
+            if (is_freeing_objects) {
+                free( map->data[i]);
+            }
         }
     }
     free(map->data);
 }
 
 /*
-    Used for freeing the maps meta data. You should clean up map objects yourself,
-    as the map cannot discover and clean up pointers to objects within objects. This
-    function only cleans up the maps structural data.
-
-    So free your objects, then call this to free the map, and everything should be
-    cleaned up.
+    Used for freeing the maps meta data, freeing stored objects if specified.
 */
-void free_map(Map* map) {
-    free_map_data(map);
+void free_map(Map* map, int is_freeing_objects) {
+    free_map_data(map, is_freeing_objects);
     free(map);
 }
 
@@ -386,7 +383,7 @@ static void resize_map(Map* map) {
         }
     }
 
-    free_map_data(map);
+    free_map_data(map, 0);
     map->data = new_map->data;
     map->data_size = new_map->data_size;
     map->len = new_map->len;
@@ -514,6 +511,7 @@ void* m_any_get(Map* map, void* key, size_t key_size) {
 
 /*
     Function to get an object in the map, using an int as the key
+    Returns a NULL pointer if no object exists at the key
 */
 void* m_int_get(Map* map, int key) {
     return m_any_get(map, &key, sizeof(key));
@@ -521,6 +519,7 @@ void* m_int_get(Map* map, int key) {
 
 /*
     Function to get an object in the map, using an string as the key
+    Returns a NULL pointer if no object exists at the key
 */
 void* m_get(Map* map, char* key) {
     return m_any_get(map, key, (strlen(key) + 1) * sizeof(char));
@@ -630,8 +629,11 @@ Element** map_elements(Map* map) {
 }
 
 
-void clear_map(Map* map) {
-    free_map(map);
+/**
+ * Clears the map, freeing stored objects if specified.
+ */
+void clear_map(Map* map, int is_freeing_objects) {
+    free_map(map, is_freeing_objects);
     map = new_map();
 }
 

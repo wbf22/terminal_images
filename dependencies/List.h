@@ -327,12 +327,14 @@ void l_set(List* list, int index, void* data) {
 
 
 /*
-    Clears the list, and frees all objects on the heap.
+    Clears the list, and frees all objects on the heap if specified.
 */
-void l_clear(List* list) {
+void l_clear(List* list, int is_freeing_objects) {
     // Free each pointer inside data
-    for (size_t i = 0; i < list->data_size; i++) {
-        free(list->data[i]);
+    if (is_freeing_objects) {
+        for (size_t i = 0; i < list->len; i++) {
+            free(l_get(list, i));
+        }
     }
     list->len = 0;
     list->start = 0;
@@ -340,11 +342,11 @@ void l_clear(List* list) {
 }
 
 /*
-    frees the list and stored objects
+    frees the list and stored objects if specified.
 */
-void free_list(List* list) {
+void free_list(List* list, int is_freeing_objects) {
     // Free data
-    l_clear(list);
+    l_clear(list, is_freeing_objects);
     free(list->data);
     // Free the struct itself
     free(list);

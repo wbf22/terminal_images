@@ -21,6 +21,9 @@
         "optional": "c",
         "string_view": "c",
         "variant": "c",
-        "stb_image_write.h": "c"
+        "stb_image_write.h": "c",
+        "stdlib.h": "c",
+        "__node_handle": "c",
+        "array": "c"
     }
 }

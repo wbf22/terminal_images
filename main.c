@@ -20,7 +20,7 @@ char* RESET = "\033[0m";
 char* RED = "\033[252;3;3m";
 char* YELLOW = "\033[252;186;3m";
 
-int KMEANS_ITERATIONS = 3; // trades speed for 
+int KMEANS_ITERATIONS = 3; // trades speed for color accuracy
 
 Map* make_character_map() {
 
@@ -262,10 +262,11 @@ int get_image_index(
     int inside_cell_pixel_x, 
     int inside_cell_pixel_y,
     int image_width_cells,
-    int cell_width_pixels
+    int cell_width_pixels,
+    int cell_height_pixels
 ) {
     
-    int i = cell_y * image_width_cells * cell_width_pixels + cell_x * cell_width_pixels; // top corner of cell in pixels
+    int i = cell_y * cell_height_pixels * image_width_cells * cell_width_pixels + cell_x * cell_width_pixels; // top corner of cell in pixels
     // adjust for y level inside cell
     if (inside_cell_pixel_y != 0) {
         i += (image_width_cells - cell_x) * cell_width_pixels; 
@@ -296,7 +297,6 @@ void ansii_reset() {
 
 
 int main(int argc, char **argv) {
-
     if (argc != 2 || argv[1] == NULL) {
         printf("%sPlease provide a single path to and image file you'd like to display%s", RED, RESET);
         exit(-1);
@@ -317,13 +317,17 @@ int main(int argc, char **argv) {
         perror("ioctl");
         return 1;
     }
-    int terminal_width = w.ws_row;
-    int terminal_height = w.ws_col;
+    int terminal_width = w.ws_col;
+    int terminal_height = w.ws_row;
 
 
     // LOAD image
     int image_width, image_height, channels;
     uint8_t *image = stbi_load(path, &image_width, &image_height, &channels, 0);
+    if (!image) {
+        printf("Failed to load image: %s\n", stbi_failure_reason());
+        exit(-1);
+    }
 
     int CURSOR_WIDTH = 8;
     int CURSOR_HEIGHT = 16;
@@ -342,13 +346,13 @@ int main(int argc, char **argv) {
     }
 
     int pixels_per_cell_y, pixels_per_cell_x;
-    pixels_per_cell_y = pixels_per_cell_pixel * CURSOR_WIDTH;
-    pixels_per_cell_x = pixels_per_cell_pixel * CURSOR_HEIGHT;
+    pixels_per_cell_y = pixels_per_cell_pixel * CURSOR_HEIGHT;
+    pixels_per_cell_x = pixels_per_cell_pixel * CURSOR_WIDTH;
 
 
     // SCALE image with bilinear interpolation
-    int new_width = image_width * pixels_per_cell_pixel;
-    int new_height = image_height * pixels_per_cell_pixel;
+    int new_width = image_width / pixels_per_cell_pixel;
+    int new_height = image_height / pixels_per_cell_pixel;
     int new_image_length = new_height * new_width * 4;
     uint8_t* new_image = malloc(sizeof(uint8_t) * new_image_length);
     for (int x = 0; x < new_width; x++) {
@@ -471,65 +475,137 @@ int main(int argc, char **argv) {
     for (int c_y = 0; c_y < image_height_cells; c_y++) {
         for (int c_x = 0; c_x < image_width_cells; c_x++) {
 
-            // kmeans determine color pair for cells
-            int avg_1_r = 255;
-            int avg_1_g = 255;
-            int avg_1_b = 255;
-            int avg_1_a = 255;
-            int avg_2_r = 0;
-            int avg_2_g = 0;
-            int avg_2_b = 0;
-            int avg_2_a = 0;
-            List* avg_1 = new_list();
-            List* avg_2 = new_list();
-            for (int k = 0; k < KMEANS_ITERATIONS; k++) {
+            // // kmeans determine color pair for cells
+            // int avg_1_r = new_image[0];
+            // int avg_1_g = new_image[1];
+            // int avg_1_b = new_image[2];
+            // int avg_1_a = new_image[3];
+            // int avg_2_in = get_image_index(c_x, c_y, 4, 8, image_width_cells, CURSOR_WIDTH, CURSOR_HEIGHT);
+            // int avg_2_r = new_image[avg_2_in];
+            // int avg_2_g = new_image[avg_2_in+1];
+            // int avg_2_b = new_image[avg_2_in+2];
+            // int avg_2_a = new_image[avg_2_in+3];
+            // List* avg_1 = new_list();
+            // List* avg_2 = new_list();
+            // for (int k = 0; k < KMEANS_ITERATIONS; k++) {
                 
-                // sort into groups
-                for (int x = 0; x < CURSOR_WIDTH; x++) {
-                    for (int y = 0; y < CURSOR_HEIGHT; y++) {
+            //     // sort into groups
+            //     for (int x = 0; x < CURSOR_WIDTH; x++) {
+            //         for (int y = 0; y < CURSOR_HEIGHT; y++) {
                         
-                        int i = get_image_index(c_x, c_y, x, y, image_width_cells, CURSOR_WIDTH);
-                        uint8_t r = new_image[i];
-                        uint8_t g = new_image[i+1];
-                        uint8_t b = new_image[i+2];
-                        uint8_t a = new_image[i+3];
-                        int dist_1 = dist(avg_1_r, avg_1_g, avg_1_g, avg_1_a, r, g, b, a);
-                        int dist_2 = dist(avg_2_r, avg_2_g, avg_2_g, avg_2_a, r, g, b, a);
-                        int* coor = malloc(sizeof(int) * 2);
-                        coor[0] = x;
-                        coor[1] = y;
-                        if (dist_1 < dist_2) {
-                            l_push(avg_1, coor);
-                        }
-                        else {
-                            l_push(avg_2, coor);
-                        }
+            //             int i = get_image_index(c_x, c_y, x, y, image_width_cells, CURSOR_WIDTH, CURSOR_HEIGHT);
+            //             uint8_t r = new_image[i];
+            //             uint8_t g = new_image[i+1];
+            //             uint8_t b = new_image[i+2];
+            //             uint8_t a = new_image[i+3];
+            //             int dist_1 = dist(avg_1_r, avg_1_g, avg_1_g, avg_1_a, r, g, b, a);
+            //             int dist_2 = dist(avg_2_r, avg_2_g, avg_2_g, avg_2_a, r, g, b, a);
+            //             int* coor = malloc(sizeof(int) * 2);
+            //             coor[0] = x;
+            //             coor[1] = y;
+            //             if (dist_1 < dist_2) {
+            //                 l_push(avg_1, coor);
+            //             }
+            //             else {
+            //                 l_push(avg_2, coor);
+            //             }
+            //         }
+            //     }
+            //     // determine new averages
+            //     avg_1_r = 0;
+            //     avg_1_g = 0;
+            //     avg_1_b = 0;
+            //     avg_1_a = 0;
+            //     avg_2_r = 0;
+            //     avg_2_g = 0;
+            //     avg_2_b = 0;
+            //     avg_2_a = 0;
+            //     for (int i = 0; i < avg_1->len; ++i) {
+            //         int* coor = l_get(avg_1, i);
+            //         int index = get_image_index(c_x, c_y, coor[0], coor[1], image_width_cells, CURSOR_WIDTH, CURSOR_HEIGHT);
+            //         avg_1_r += new_image[index];
+            //         avg_1_g += new_image[index+1];
+            //         avg_1_b += new_image[index+2];
+            //         avg_1_a += new_image[index+3];
+            //     }
+            //     avg_1_r /= avg_1->len;
+            //     avg_1_g /= avg_1->len;
+            //     avg_1_b /= avg_1->len;
+            //     avg_1_a /= avg_1->len;
+            //     l_clear(avg_1);
+            //     for (int i = 0; i < avg_2->len; ++i) {
+            //         int* coor = l_get(avg_2, i);
+            //         int index = get_image_index(c_x, c_y, coor[0], coor[1], image_width_cells, CURSOR_WIDTH, CURSOR_HEIGHT);
+            //         avg_2_r += new_image[index];
+            //         avg_2_g += new_image[index+1];
+            //         avg_2_b += new_image[index+2];
+            //         avg_2_a += new_image[index+3];
+            //     }
+            //     avg_2_r /= avg_2->len;
+            //     avg_2_g /= avg_2->len;
+            //     avg_2_b /= avg_2->len;
+            //     avg_2_a /= avg_2->len;
+            //     l_clear(avg_2);
+
+            // }
+            // free_list(avg_1);
+            // free_list(avg_2);
+
+
+            // determine most repeated colors
+            Map* color_repeats = new_map();
+            for (int x = 0; x < CURSOR_WIDTH; x++) {
+                for (int y = 0; y < CURSOR_HEIGHT; y++) {
+                    
+                    int i = get_image_index(c_x, c_y, x, y, image_width_cells, CURSOR_WIDTH, CURSOR_HEIGHT);
+                    uint8_t r = new_image[i];
+                    uint8_t g = new_image[i+1];
+                    uint8_t b = new_image[i+2];
+                    uint8_t a = new_image[i+3];
+                    uint32_t key = (r << 24) | (g << 16) | (b << 8) | a;
+                    List* pixels = m_any_get(color_repeats, &key, sizeof(uint32_t));
+                    if (pixels == NULL) {
+                        pixels = new_list();
+                        l_push(pixels, new_image + i);
                     }
+                    else {
+                        l_push(pixels, new_image + i);
+                    }
+                    m_any_put(color_repeats, &key, sizeof(uint32_t), pixels, sizeof(List));
                 }
-
-                // determine new averages
-                for (int i = 0; i < avg_1->len; ++i) {
-                    int* coor = l_get(avg_1, i);
-                    int index = get_image_index(c_x, c_y, coor[0], coor[1], image_width_cells, CURSOR_WIDTH);
-                    avg_1_r += new_image[index];
-                    avg_1_g += new_image[index+1];
-                    avg_1_b += new_image[index+2];
-                    avg_1_a += new_image[index+3];
-                }
-                l_clear(avg_1);
-                for (int i = 0; i < avg_2->len; ++i) {
-                    int* coor = l_get(avg_2, i);
-                    int index = get_image_index(c_x, c_y, coor[0], coor[1], image_width_cells, CURSOR_WIDTH);
-                    avg_2_r += new_image[index];
-                    avg_2_g += new_image[index+1];
-                    avg_2_b += new_image[index+2];
-                    avg_2_a += new_image[index+3];
-                }
-                l_clear(avg_2);
-
             }
-            free_list(avg_1);
-            free_list(avg_2);
+            
+            int avg_1_r = new_image[0];
+            int avg_1_g = new_image[1];
+            int avg_1_b = new_image[2];
+            int avg_1_a = new_image[3];
+            int avg_2_in = get_image_index(c_x, c_y, 4, 8, image_width_cells, CURSOR_WIDTH, CURSOR_HEIGHT);
+            int avg_2_r = new_image[avg_2_in];
+            int avg_2_g = new_image[avg_2_in+1];
+            int avg_2_b = new_image[avg_2_in+2];
+            int avg_2_a = new_image[avg_2_in+3];
+            
+            int most_repeated = 1;
+            Element** repeats = map_elements(color_repeats);
+            for (int i = 0; i < color_repeats->len; ++i) {
+                Element* element = repeats[i];
+                List* pixels = element->data;
+                if (pixels->len > most_repeated) {
+                    uint8_t* pixel = l_get(pixels, 0);
+                    avg_2_r = avg_1_r;
+                    avg_2_g = avg_1_g;
+                    avg_2_b = avg_1_b;
+                    avg_2_a = avg_1_a;
+                    avg_1_r = pixel[0];
+                    avg_1_g = pixel[1];
+                    avg_1_b = pixel[2];
+                    avg_1_a = pixel[3];
+                    most_repeated = pixels->len;
+                }
+            }
+            free(repeats);
+            free_map(color_repeats, 1);
+
 
 
             // determine character that matches the pixels the best
@@ -538,7 +614,7 @@ int main(int argc, char **argv) {
             for (int x = 0; x < CURSOR_WIDTH; x++) {
                 for (int y = 0; y < CURSOR_HEIGHT; y++) {
 
-                    int i = get_image_index(c_x, c_y, x, y, image_width_cells, CURSOR_WIDTH);
+                    int i = get_image_index(c_x, c_y, x, y, image_width_cells, CURSOR_WIDTH, CURSOR_HEIGHT);
                     uint8_t r = new_image[i];
                     uint8_t g = new_image[i+1];
                     uint8_t b = new_image[i+2];
@@ -556,13 +632,13 @@ int main(int argc, char **argv) {
                     if (dist_1 < dist_2) {
                         set_bit(
                             is_second_uint? &first_variation[1] : &first_variation[0],
-                            index
+                            63-index
                         );
                     }
                     else {
                         set_bit(
                             is_second_uint? &second_variation[1] : &second_variation[0],
-                            index
+                            63-index
                         );
                     }   
                 }
@@ -591,7 +667,6 @@ int main(int argc, char **argv) {
                     best_variation_closeness = closeness;
                     element_key = element->key;
                 }
-                free(element);
             }
             free(elements);
             
