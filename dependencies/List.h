@@ -403,7 +403,7 @@ List* l_slice(List* list, int start, int end) {
 }
 
 
-void l_sort(List* list, int (* _Nonnull __compar)(const void *, const void *)) {
+void l_sort(List* list, int (* __compar)(const void *, const void *)) {
     resize(list); // get list data all in a row
     qsort(list->data, list->len, sizeof(void*),  __compar);
 }
