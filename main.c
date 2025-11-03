@@ -30,6 +30,7 @@ char* YELLOW = "\033[252;186;3m";
 
 int KMEANS_ITERATIONS = 3; // trades speed for color accuracy
 
+
 Map* make_character_map() {
 
     // ▙▂▝╫┃╯╳▖▚▞ ╲▗▀▛▟█┳╭╱▒▘▜╋░
@@ -462,7 +463,7 @@ int get_image_index(
     int cell_height_pixels
 ) {
     
-    int i = cell_y * cell_height_pixels * image_width_cells * cell_width_pixels + cell_x * cell_width_pixels; // top corner of cell in pixels
+    int i = cell_y * image_width_cells * cell_height_pixels * cell_width_pixels + cell_x * cell_width_pixels; // top corner of cell in pixels
     // adjust for y level inside cell
     if (inside_cell_pixel_y != 0) {
         i += (image_width_cells - cell_x) * cell_width_pixels; 
@@ -601,14 +602,24 @@ void kmeans_for_colors(
 }
 
 int main(int argc, char **argv) {
-    if (argc != 2 || argv[1] == NULL) {
+    if (argc < 2 || argv[1] == NULL) {
         printf("%sPlease provide a single path to and image file you'd like to display%s", RED, RESET);
         exit(-1);
     }
 
 
     // get file path
-    char* path = argv[1];
+    char* path;
+
+    int info = 0;
+    if (argc > 2) {
+        char* flag = argv[1];
+        info = strcmp(flag, "-i") == 0;
+        path = argv[2];
+    }
+    else {
+        path = argv[1];
+    }
 
 
     // load map
@@ -624,6 +635,10 @@ int main(int argc, char **argv) {
     int terminal_width = w.ws_col - 2;
     int terminal_height = w.ws_row - 2;
 
+    if (info) {
+        terminal_height -= 4;
+    }
+
 
     // LOAD image
     int image_width, image_height, channels;
@@ -636,7 +651,7 @@ int main(int argc, char **argv) {
     int CURSOR_WIDTH = 8;
     int CURSOR_HEIGHT = 16;
     double image_ratio = (double)image_width / (double)image_height;
-    double terminal_ratio = (double)terminal_width * CURSOR_WIDTH / (double)terminal_height * CURSOR_HEIGHT;
+    double terminal_ratio = (double)(terminal_width * CURSOR_WIDTH) / (double)(terminal_height * CURSOR_HEIGHT);
 
     // DETERMINE pixels per cell
     double pixels_per_cell_pixel;
@@ -653,6 +668,16 @@ int main(int argc, char **argv) {
     // SCALE image with bilinear interpolation
     int new_width = image_width / pixels_per_cell_pixel;
     int new_height = image_height / pixels_per_cell_pixel;
+
+    // ensure multiples of 8
+    while(new_width % 8 != 0) {
+        --new_width;
+    }
+    while(new_height % 8 != 0) {
+        --new_height;
+    }
+
+
     int new_image_length = new_height * new_width * 4;
     uint8_t* new_image = malloc(sizeof(uint8_t) * new_image_length);
     for (int x = 0; x < new_width; x++) {
@@ -769,7 +794,6 @@ int main(int argc, char **argv) {
 
 
     // DETERMINE characters and colors for each cell
-
     int image_width_cells = ceil((double)new_width / (double)CURSOR_WIDTH);
     int image_height_cells = ceil((double)new_height / (double)CURSOR_HEIGHT);
     for (int c_y = 0; c_y < image_height_cells; c_y++) {
@@ -802,6 +826,12 @@ int main(int argc, char **argv) {
                 for (int y = 0; y < CURSOR_HEIGHT; y++) {
 
                     int i = get_image_index(c_x, c_y, x, y, image_width_cells, CURSOR_WIDTH, CURSOR_HEIGHT);
+
+                    // index = (x + y*width) * 4
+                    int pixel_x = (i / 4) % new_width;
+                    int pixel_y = ((i / 4) - x) / new_width;
+                    int cursor_x = pixel_x / CURSOR_WIDTH;
+                    int cursor_y = pixel_y / CURSOR_HEIGHT;
                     uint8_t r = new_image[i];
                     uint8_t g = new_image[i+1];
                     uint8_t b = new_image[i+2];
@@ -827,7 +857,7 @@ int main(int argc, char **argv) {
                             is_second_uint? &second_variation[1] : &second_variation[0],
                             63-index
                         );
-                    }   
+                    }
                 }
             }
 
@@ -885,6 +915,22 @@ int main(int argc, char **argv) {
     free(image);
     free(new_image);
     free_map(character_to_pixels, 1);
+
+
+    if (info) {
+
+        printf("image_width %d\n", image_width);
+        printf("image_height %d\n", image_height);
+        printf("channels %d\n", channels);
+
+        FILE *f = fopen(path, "rb");
+        fseek(f, 0, SEEK_END);
+        long size_bytes = ftell(f);
+        fclose(f);
+        double size_mb = (double)size_bytes / (1000.0 * 1000.0);
+        printf("size %.2f MB\n", size_mb);
+
+    }
     
     return 0;
 }
