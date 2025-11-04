@@ -4,6 +4,10 @@ A termainl app to display images in the terminal (for terminals that support ans
 
 Really this is basically an ascii art generator that also has colors. 
 
+There is also a single header file in this repo at [dependencies/TerminalImages.h](dependencies/TerminalImages.h) that contains the logic to read
+an image and return a array of unicode characters with corresponding ansii color codes. This could be used in other apps for converting images
+into ascii art by copying the file.
+
 # Compiling
 We use a python script to compile this program, which is included in the repo. It relies on gcc so it will probably only work on Linux, Mac, and WSL.
 You can compile it like so:
@@ -31,6 +35,7 @@ Which takes an image like this:
 ![wizards](test/wizards.jpg)
 
 And outputs this in the terminal:
+
 ![terminal output](test/example_screenshot.png)
 
 
