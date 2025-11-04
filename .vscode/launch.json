@@ -12,9 +12,9 @@
             "args": [
                 "-i",
                 // "test/skull_knight.png"
-                // "test/wizards.jpg"
+                "test/wizards.jpg"
                 // "test/test.png"
-                "test/red_castle.jpg"
+                // "test/red_castle.jpg"
             ],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "bear_make"

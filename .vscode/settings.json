@@ -29,6 +29,7 @@
         "deque": "c",
         "initializer_list": "c",
         "queue": "c",
-        "stack": "c"
+        "stack": "c",
+        "string.h": "c"
     }
 }
