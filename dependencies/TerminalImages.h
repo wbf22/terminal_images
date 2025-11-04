@@ -11408,12 +11408,27 @@ typedef struct {
     TImageColor background_color;
 } TImageCell;
 
+
+void free_image_cells(TImageCell** cells, int display_width, int display_height) {
+   int length = display_width * display_height;
+   for (int i = 0; i < length; ++i) {
+      TImageCell* cell = cells[i];
+      if (cell != NULL) {
+         free(cell->unicode);
+         free(cell);
+      }
+   }
+   free(cells);
+}
+
 /**
  * Converts an image file to an array of cells containing the ansii color codes and unicode characters. 
  * This 1d array can be printed adding a newline every display_width cells to display the image in the terminal.
  * 
  * If the image size won't fit perfectly in display_width x display_height cells, then the image will be scaled
  * to fit in the area (but not distorted).
+ * 
+ * You can call the free_image_cells method above to clean up the output of this function after you're done with it.
  */
 TImageCell** convert_image_to_ansii_cells(char* path, int display_width, int display_height) {
 

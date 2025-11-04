@@ -96,12 +96,14 @@ int main(int argc, char **argv) {
             fflush(stdout);  
         }
     }
+    free_image_cells(cells, terminal_width, terminal_height);
     
 
 
     if (info) {
         int image_width, image_height, channels;
         uint8_t *image = stbi_load(path, &image_width, &image_height, &channels, 0);
+        free(image);
 
         printf("image_width %d\n", image_width);
         printf("image_height %d\n", image_height);
