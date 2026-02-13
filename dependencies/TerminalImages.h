@@ -10859,13 +10859,13 @@ Map* make_character_map() {
     memcpy(copy, empty, 2 * sizeof(uint64_t));
     m_put(character_to_pixels, " ", copy, sizeof(empty));
 
-    uint64_t dots[2] = {
-        0b1000100000000000001000100000000010001000000000000010001000000000ULL,
-        0b1000100000000000001000100000000010001000000000000010001000000000ULL,
-    };
-    copy = malloc(2 * sizeof(uint64_t));
-    memcpy(copy, dots, 2 * sizeof(uint64_t));
-    m_put(character_to_pixels, "░", copy, sizeof(dots));
+   //  uint64_t dots[2] = {
+   //      0b1000100000000000001000100000000010001000000000000010001000000000ULL,
+   //      0b1000100000000000001000100000000010001000000000000010001000000000ULL,
+   //  };
+   //  copy = malloc(2 * sizeof(uint64_t));
+   //  memcpy(copy, dots, 2 * sizeof(uint64_t));
+   //  m_put(character_to_pixels, "░", copy, sizeof(dots));
 
     uint64_t l[2] = {
         0b1111000011110000111100001111000011110000111100001111000011110000ULL,
@@ -10883,61 +10883,61 @@ Map* make_character_map() {
     memcpy(copy, slab, 2 * sizeof(uint64_t));
     m_put(character_to_pixels, "▂", copy, sizeof(slab));
 
-    uint64_t cross[2] = {
-        0b0011110000111100001111000011110000111100001111001111111111111111ULL,
-        0b1111111111111111001111000011110000111100001111000011110000111100ULL,
-    };
-    copy = malloc(2 * sizeof(uint64_t));
-    memcpy(copy, cross, 2 * sizeof(uint64_t));
-    m_put(character_to_pixels, "╋", copy, sizeof(cross));
+   //  uint64_t cross[2] = {
+   //      0b0011110000111100001111000011110000111100001111001111111111111111ULL,
+   //      0b1111111111111111001111000011110000111100001111000011110000111100ULL,
+   //  };
+   //  copy = malloc(2 * sizeof(uint64_t));
+   //  memcpy(copy, cross, 2 * sizeof(uint64_t));
+   //  m_put(character_to_pixels, "╋", copy, sizeof(cross));
 
-    uint64_t pole[2] = {
-        0b0011110000111100001111000011110000111100001111000011110000111100ULL,
-        0b0011110000111100001111000011110000111100001111000011110000111100ULL,
-    };
-    copy = malloc(2 * sizeof(uint64_t));
-    memcpy(copy, pole, 2 * sizeof(uint64_t));
-    m_put(character_to_pixels, "┃", copy, sizeof(pole));
+   //  uint64_t pole[2] = {
+   //      0b0011110000111100001111000011110000111100001111000011110000111100ULL,
+   //      0b0011110000111100001111000011110000111100001111000011110000111100ULL,
+   //  };
+   //  copy = malloc(2 * sizeof(uint64_t));
+   //  memcpy(copy, pole, 2 * sizeof(uint64_t));
+   //  m_put(character_to_pixels, "┃", copy, sizeof(pole));
 
-    uint64_t r[2] = {
-        0b0000000000000000000000000000000000000000000000000000000000000000ULL,
-        0b0000011100001100000110000001000000010000000100000001000000010000ULL,
-    };
-    copy = malloc(2 * sizeof(uint64_t));
-    memcpy(copy, full, 2 * sizeof(uint64_t));
-    m_put(character_to_pixels, "╭", copy, sizeof(r));
+   //  uint64_t r[2] = {
+   //      0b0000000000000000000000000000000000000000000000000000000000000000ULL,
+   //      0b0000011100001100000110000001000000010000000100000001000000010000ULL,
+   //  };
+   //  copy = malloc(2 * sizeof(uint64_t));
+   //  memcpy(copy, full, 2 * sizeof(uint64_t));
+   //  m_put(character_to_pixels, "╭", copy, sizeof(r));
 
-    uint64_t x_sym[2] = {
-        0b1000000110000001110000110100001001100110001001000010010000011000ULL,
-        0b0001100000100100001001000110011001000010110000111000000110000001ULL,
-    };
-    copy = malloc(2 * sizeof(uint64_t));
-    memcpy(copy, x_sym, 2 * sizeof(uint64_t));
-    m_put(character_to_pixels, "╳", copy, sizeof(x_sym));
+   //  uint64_t x_sym[2] = {
+   //      0b1000000110000001110000110100001001100110001001000010010000011000ULL,
+   //      0b0001100000100100001001000110011001000010110000111000000110000001ULL,
+   //  };
+   //  copy = malloc(2 * sizeof(uint64_t));
+   //  memcpy(copy, x_sym, 2 * sizeof(uint64_t));
+   //  m_put(character_to_pixels, "╳", copy, sizeof(x_sym));
 
-    uint64_t j[2] = {
-        0b0001000000010000000100000001000000010000001100000110000011000000ULL,
-        0b0000000000000000000000000000000000000000000000000000000000000000ULL,
-    };
-    copy = malloc(2 * sizeof(uint64_t));
-    memcpy(copy, j, 2 * sizeof(uint64_t));
-    m_put(character_to_pixels, "╯", copy, sizeof(j));
+   //  uint64_t j[2] = {
+   //      0b0001000000010000000100000001000000010000001100000110000011000000ULL,
+   //      0b0000000000000000000000000000000000000000000000000000000000000000ULL,
+   //  };
+   //  copy = malloc(2 * sizeof(uint64_t));
+   //  memcpy(copy, j, 2 * sizeof(uint64_t));
+   //  m_put(character_to_pixels, "╯", copy, sizeof(j));
 
-    uint64_t crossed_poles[2] = {
-        0b0010010000100100001001000010010000100100001001000010010011111111ULL,
-        0b0010010000100100001001000010010000100100001001000010010000100100ULL,
-    };
-    copy = malloc(2 * sizeof(uint64_t));
-    memcpy(copy, crossed_poles, 2 * sizeof(uint64_t));
-    m_put(character_to_pixels, "╫", copy, sizeof(crossed_poles));
+   //  uint64_t crossed_poles[2] = {
+   //      0b0010010000100100001001000010010000100100001001000010010011111111ULL,
+   //      0b0010010000100100001001000010010000100100001001000010010000100100ULL,
+   //  };
+   //  copy = malloc(2 * sizeof(uint64_t));
+   //  memcpy(copy, crossed_poles, 2 * sizeof(uint64_t));
+   //  m_put(character_to_pixels, "╫", copy, sizeof(crossed_poles));
 
-    uint64_t t[2] = {
-        0b0000000000000000000000000000000000000000000000001111111111111111ULL,
-        0b1111111100111100001111000011110000111100001111000011110000111100ULL,
-    };
-    copy = malloc(2 * sizeof(uint64_t));
-    memcpy(copy, t, 2 * sizeof(uint64_t));
-    m_put(character_to_pixels, "┳", copy, sizeof(t));
+   //  uint64_t t[2] = {
+   //      0b0000000000000000000000000000000000000000000000001111111111111111ULL,
+   //      0b1111111100111100001111000011110000111100001111000011110000111100ULL,
+   //  };
+   //  copy = malloc(2 * sizeof(uint64_t));
+   //  memcpy(copy, t, 2 * sizeof(uint64_t));
+   //  m_put(character_to_pixels, "┳", copy, sizeof(t));
 
     uint64_t p[2] = {
         0b1111111111111111111111111111111111111111111111111111111111111111ULL,
@@ -10987,21 +10987,21 @@ Map* make_character_map() {
     memcpy(copy, corner_squares_2, 2 * sizeof(uint64_t));
     m_put(character_to_pixels, "▞", copy, sizeof(corner_squares_2));
 
-    uint64_t forward_slash[2] = {
-        0b0000000100000011000001100000010000001100000010000001100000010000ULL,
-        0b0001000000110000001000000110000001100000110000001000000010000000ULL,
-    };
-    copy = malloc(2 * sizeof(uint64_t));
-    memcpy(copy, forward_slash, 2 * sizeof(uint64_t));
-    m_put(character_to_pixels, "╱", copy, sizeof(forward_slash));
+   //  uint64_t forward_slash[2] = {
+   //      0b0000000100000011000001100000010000001100000010000001100000010000ULL,
+   //      0b0001000000110000001000000110000001100000110000001000000010000000ULL,
+   //  };
+   //  copy = malloc(2 * sizeof(uint64_t));
+   //  memcpy(copy, forward_slash, 2 * sizeof(uint64_t));
+   //  m_put(character_to_pixels, "╱", copy, sizeof(forward_slash));
 
-    uint64_t back_slash[2] = {
-        0b1000000010000000110000000100000001100000001000000010000000110000ULL,
-        0b0001000000011000000010000000110000001100000001100000001000000011ULL,
-    };
-    copy = malloc(2 * sizeof(uint64_t));
-    memcpy(copy, back_slash, 2 * sizeof(uint64_t));
-    m_put(character_to_pixels, "╲", copy, sizeof(back_slash));
+   //  uint64_t back_slash[2] = {
+   //      0b1000000010000000110000000100000001100000001000000010000000110000ULL,
+   //      0b0001000000011000000010000000110000001100000001100000001000000011ULL,
+   //  };
+   //  copy = malloc(2 * sizeof(uint64_t));
+   //  memcpy(copy, back_slash, 2 * sizeof(uint64_t));
+   //  m_put(character_to_pixels, "╲", copy, sizeof(back_slash));
 
     uint64_t top_right_half[2] = {
         0b1111111111111111111111111111111111111111111111111111111111111111ULL,
