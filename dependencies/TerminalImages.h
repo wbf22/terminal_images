@@ -11448,7 +11448,7 @@ TImageCell** convert_image_to_ansii_cells(char* path, int display_width, int dis
     }
 
     int CURSOR_WIDTH = 8;
-    int CURSOR_HEIGHT = 16;
+    int CURSOR_HEIGHT = 19;
     double image_ratio = (double)image_width / (double)image_height;
     double terminal_ratio = (double)(display_width * CURSOR_WIDTH) / (double)(display_height * CURSOR_HEIGHT);
 
