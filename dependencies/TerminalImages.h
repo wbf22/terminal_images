@@ -11589,12 +11589,12 @@ TImageCell** convert_image_to_ansii_cells(char* path, int display_width, int dis
             new_image[index+3] = a;
         }
     }
-    // stbi_write_png("test/resized.png", new_width, new_height, 4, new_image, new_width * 4);
+   //  stbi_write_png("test/resized.png", new_width, new_height, 4, new_image, new_width * 4);
 
 
     // DETERMINE characters and colors for each cell
-    int image_width_cells = ceil((double)new_width / (double)CURSOR_WIDTH);
-    int image_height_cells = ceil((double)new_height / (double)CURSOR_HEIGHT);
+    int image_width_cells = floor((double)new_width / (double)CURSOR_WIDTH);
+    int image_height_cells = floor((double)new_height / (double)CURSOR_HEIGHT);
     for (int c_y = 0; c_y < image_height_cells; c_y++) {
         for (int c_x = 0; c_x < image_width_cells; c_x++) {
 
