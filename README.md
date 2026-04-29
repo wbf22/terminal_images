@@ -1,12 +1,14 @@
 # terminal images
 
-A termainl app to display images in the terminal (for terminals that support ansii rgb colors but don't allow changing pixels in the terminal).
+A terminal app to display images in the terminal (for terminals that support ansii rgb colors but don't allow changing pixels in the terminal).
 
 Really this is basically an ascii art generator that also has colors. 
 
 There is also a single header file in this repo at [dependencies/TerminalImages.h](dependencies/TerminalImages.h) that contains the logic to read
 an image and return a array of unicode characters with corresponding ansii color codes. This could be used in other apps for converting images
 into ascii art by copying the file.
+
+If you'd like to support me, you can do so here https://github.com/sponsors/wbf22
 
 # Compiling
 We use a python script to compile this program, which is included in the repo. It relies on gcc so it will probably only work on Linux, Mac, and WSL.
@@ -20,12 +22,12 @@ This generates a gcc command which is run to compile the program. With the curre
 gcc -g -O0 -Wall -Wextra -o ti build/main.o -lm
 ```
 
-But that could change
+You can just use that command if you prefer.
 
 
 # Usage
 
-Here's how the command can be used
+Here's how the app can be used
 ```
 ./ti path/to/your/image.png 
 ```
